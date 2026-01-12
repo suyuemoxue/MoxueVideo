@@ -34,35 +34,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := db.AutoMigrate(
-		&model.User{},
-		&model.Video{},
-		&model.Follow{},
-		&model.Like{},
-		&model.Favorite{},
-	); err != nil {
+	if err := db.AutoMigrate(&model.User{}); err != nil {
 		log.Error("auto migrate failed", slog.Any("err", err))
 		os.Exit(1)
 	}
 
 	userRepo := repo.NewUserRepo(db)
-	videoRepo := repo.NewVideoRepo(db)
-	likeRepo := repo.NewLikeRepo(db)
-	favoriteRepo := repo.NewFavoriteRepo(db)
-	followRepo := repo.NewFollowRepo(db)
 
 	authSvc := service.NewAuthService(userRepo, cfg.JWT.Secret)
-	videoSvc := service.NewVideoService(videoRepo, userRepo, likeRepo, favoriteRepo, followRepo)
-	interactSvc := service.NewInteractionService(videoRepo, likeRepo, favoriteRepo)
-	followSvc := service.NewFollowService(userRepo, followRepo)
 
 	authHandler := handler.NewAuthHandler(authSvc)
 	meHandler := handler.NewMeHandler(userRepo)
-	videoHandler := handler.NewVideoHandler(videoSvc, cfg.JWT.Secret)
-	interactionHandler := handler.NewInteractionHandler(interactSvc, videoSvc, likeRepo, favoriteRepo)
-	followHandler := handler.NewFollowHandler(followSvc, userRepo, followRepo)
 
-	r := httpserver.NewRouter(cfg, authHandler, meHandler, videoHandler, interactionHandler, followHandler)
+	r := httpserver.NewRouter(cfg, authHandler, meHandler)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,

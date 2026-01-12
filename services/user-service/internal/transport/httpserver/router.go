@@ -7,14 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter(
-	cfg config.Config,
-	auth *handler.AuthHandler,
-	me *handler.MeHandler,
-	videos *handler.VideoHandler,
-	interactions *handler.InteractionHandler,
-	follow *handler.FollowHandler,
-) *gin.Engine {
+func NewRouter(cfg config.Config, auth *handler.AuthHandler, me *handler.MeHandler) *gin.Engine {
 	if cfg.Env != "dev" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -31,24 +24,9 @@ func NewRouter(
 		authg.POST("/register", auth.Register)
 		authg.POST("/login", auth.Login)
 
-		v1.GET("/videos/feed", videos.Feed)
-		v1.GET("/videos/:id", videos.Get)
-		v1.GET("/users/:id/videos", videos.ListByUser)
-
 		protected := v1.Group("")
 		protected.Use(middleware.JWTAuth(cfg.JWT.Secret))
 		protected.GET("/me", me.Me)
-		protected.POST("/videos/publish", videos.Publish)
-
-		protected.POST("/likes/action", interactions.LikeAction)
-		protected.GET("/likes/list", interactions.LikedList)
-
-		protected.POST("/favorites/action", interactions.FavoriteAction)
-		protected.GET("/favorites/list", interactions.FavoriteList)
-
-		protected.POST("/follow/action", follow.Action)
-		protected.GET("/follow/following", follow.FollowingList)
-		protected.GET("/follow/followers", follow.FollowersList)
 	}
 
 	return r
