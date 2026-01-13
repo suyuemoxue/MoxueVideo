@@ -51,20 +51,22 @@ func main() {
 	}
 	defer chatClient.Close()
 
-	ossSTS, err := osssts.New(
-		cfg.OSS.AccessKeyID,
-		cfg.OSS.AccessKeySecret,
-		cfg.OSS.Region,
-		cfg.OSS.Endpoint,
-		cfg.OSS.Bucket,
-		cfg.OSS.RoleARN,
-		cfg.OSS.RoleSessionName,
-		cfg.OSS.DurationSeconds,
-	)
-	if err != nil {
-		log.Fatalf("oss sts init: %v", err)
+	var ossSTS *osssts.Service
+	if cfg.OSS.AccessKeyID != "" && cfg.OSS.AccessKeySecret != "" && cfg.OSS.RoleARN != "" && cfg.OSS.Bucket != "" {
+		ossSTS, err = osssts.New(
+			cfg.OSS.AccessKeyID,
+			cfg.OSS.AccessKeySecret,
+			cfg.OSS.Region,
+			cfg.OSS.Endpoint,
+			cfg.OSS.Bucket,
+			cfg.OSS.RoleARN,
+			cfg.OSS.RoleSessionName,
+			cfg.OSS.DurationSeconds,
+		)
+		if err != nil {
+			log.Fatalf("oss sts init: %v", err)
+		}
 	}
-
 	userRepo := mysqlrepo.NewUserRepository(db)
 	videoRepo := mysqlrepo.NewVideoRepository(db)
 

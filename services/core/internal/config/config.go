@@ -37,9 +37,9 @@ func Load() Config {
 	cfg := Config{
 		Env:           getString("APP_ENV", "dev"),
 		HTTPAddr:      getString("HTTP_ADDR", ":8080"),
-		MySQLDSN:      getString("MYSQL_DSN", "moxue:suyuemoxue-mojianxue@tcp(127.0.0.1:3306)/moxuevideo?charset=utf8mb4&parseTime=True&loc=Local"),
+		MySQLDSN:      getString("MYSQL_DSN", "moxue:suyuemoxue-mojianxue@tcp(127.0.0.1:3307)/moxuevideo?charset=utf8mb4&parseTime=True&loc=Local"),
 		RedisAddr:     getString("REDIS_ADDR", "127.0.0.1:6379"),
-		RedisPassword: getString("REDIS_PASSWORD", ""),
+		RedisPassword: getString("REDIS_PASSWORD", "suyuemoxue-mojianxue"),
 		RedisDB:       getInt("REDIS_DB", 0),
 		RabbitMQURL:   getString("RABBITMQ_URL", "amqp://app:apppass@127.0.0.1:5672/"),
 		ChatGRPCAddr:  getString("CHAT_GRPC_ADDR", "127.0.0.1:50051"),

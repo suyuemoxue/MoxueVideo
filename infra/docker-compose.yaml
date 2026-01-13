@@ -1,4 +1,4 @@
-services:
+﻿services:
   mysql:
     image: mysql:8.0
     container_name: sv-mysql
@@ -9,18 +9,22 @@ services:
       MYSQL_PASSWORD: suyuemoxue-mojianxue
       TZ: Asia/Shanghai
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./chat_schema.sql:/docker-entrypoint-initdb.d/02_chat_schema.sql:ro
+    restart: unless-stopped
 
   redis:
     image: redis:7
     container_name: sv-redis
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "suyuemoxue-mojianxue"]
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -33,6 +37,7 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
 
 volumes:
   mysql_data:

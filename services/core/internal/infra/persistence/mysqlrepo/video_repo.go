@@ -2,6 +2,7 @@ package mysqlrepo
 
 import (
 	"context"
+	"time"
 
 	"moxuevideo/core/internal/domain"
 	"moxuevideo/core/internal/infra/persistence/model"
@@ -25,7 +26,11 @@ func (r *VideoRepository) CreateVideo(ctx context.Context, v *domain.Video) erro
 	if v != nil {
 		v.ID = m.ID
 		v.CreatedAt = m.CreatedAt
-		v.PublishedAt = m.PublishedAt
+		if m.PublishedAt != nil {
+			v.PublishedAt = *m.PublishedAt
+		} else {
+			v.PublishedAt = time.Time{}
+		}
 	}
 	return nil
 }
@@ -68,6 +73,11 @@ func toModelVideo(v *domain.Video) *model.Video {
 	if v == nil {
 		return &model.Video{}
 	}
+	var publishedAt *time.Time
+	if !v.PublishedAt.IsZero() {
+		t := v.PublishedAt
+		publishedAt = &t
+	}
 	return &model.Video{
 		ID:          v.ID,
 		AuthorID:    v.AuthorID,
@@ -75,13 +85,17 @@ func toModelVideo(v *domain.Video) *model.Video {
 		CoverURL:    v.CoverURL,
 		PlayURL:     v.PlayURL,
 		CreatedAt:   v.CreatedAt,
-		PublishedAt: v.PublishedAt,
+		PublishedAt: publishedAt,
 	}
 }
 
 func fromModelVideo(m *model.Video) *domain.Video {
 	if m == nil {
 		return nil
+	}
+	publishedAt := time.Time{}
+	if m.PublishedAt != nil {
+		publishedAt = *m.PublishedAt
 	}
 	return &domain.Video{
 		ID:          m.ID,
@@ -90,7 +104,7 @@ func fromModelVideo(m *model.Video) *domain.Video {
 		CoverURL:    m.CoverURL,
 		PlayURL:     m.PlayURL,
 		CreatedAt:   m.CreatedAt,
-		PublishedAt: m.PublishedAt,
+		PublishedAt: publishedAt,
 	}
 }
 

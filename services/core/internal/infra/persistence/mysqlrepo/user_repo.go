@@ -68,12 +68,12 @@ func toModelUser(u *domain.User) *model.User {
 		return &model.User{}
 	}
 	return &model.User{
-		ID:        u.ID,
-		Username:  u.Username,
-		Password:  u.Password,
-		AvatarURL: u.AvatarURL,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
+		ID:           u.ID,
+		Username:     u.Username,
+		PasswordHash: u.Password,
+		AvatarURL:    u.AvatarURL,
+		CreatedAt:    u.CreatedAt,
+		UpdatedAt:    u.UpdatedAt,
 	}
 }
 
@@ -84,7 +84,7 @@ func fromModelUser(m *model.User) *domain.User {
 	return &domain.User{
 		ID:        m.ID,
 		Username:  m.Username,
-		Password:  m.Password,
+		Password:  m.PasswordHash,
 		AvatarURL: m.AvatarURL,
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
