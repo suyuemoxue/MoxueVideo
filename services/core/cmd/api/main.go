@@ -11,10 +11,16 @@ import (
 
 	"moxuevideo/core/internal/config"
 	"moxuevideo/core/internal/infra/grpcchat"
+	"moxuevideo/core/internal/infra/health"
 	"moxuevideo/core/internal/infra/mq"
 	"moxuevideo/core/internal/infra/mysql"
+	"moxuevideo/core/internal/infra/osssts"
+	"moxuevideo/core/internal/infra/persistence/mysqlrepo"
 	"moxuevideo/core/internal/infra/redisc"
-	"moxuevideo/core/internal/transport/httpserver"
+	"moxuevideo/core/internal/transport/httpapi"
+	ossuc "moxuevideo/core/internal/usecase/oss"
+	useruc "moxuevideo/core/internal/usecase/user"
+	videouc "moxuevideo/core/internal/usecase/video"
 )
 
 func main() {
@@ -43,12 +49,39 @@ func main() {
 	}
 	defer chatClient.Close()
 
-	router := httpserver.NewRouter(httpserver.Dependencies{
-		DB:         db,
-		Redis:      redisClient,
-		RabbitMQ:   rmq,
-		ChatClient: chatClient,
+	ossSTS, err := osssts.New(
+		cfg.OSS.AccessKeyID,
+		cfg.OSS.AccessKeySecret,
+		cfg.OSS.Region,
+		cfg.OSS.Endpoint,
+		cfg.OSS.Bucket,
+		cfg.OSS.RoleARN,
+		cfg.OSS.RoleSessionName,
+		cfg.OSS.DurationSeconds,
+	)
+	if err != nil {
+		log.Fatalf("oss sts init: %v", err)
+	}
+
+	userRepo := mysqlrepo.NewUserRepository(db)
+	videoRepo := mysqlrepo.NewVideoRepository(db)
+
+	userService := useruc.New(userRepo)
+	videoService := videouc.New(videoRepo)
+	ossService := ossuc.New(ossSTS)
+
+	h := httpapi.New(httpapi.Deps{
+		User:  userService,
+		Video: videoService,
+		OSS:   ossService,
+		Health: httpapi.HealthDeps{
+			MySQL:    health.NewMySQLChecker(db),
+			Redis:    health.NewRedisChecker(redisClient),
+			RabbitMQ: health.NewRabbitMQChecker(rmq),
+			GRPC:     health.NewGRPCChecker(chatClient),
+		},
 	})
+	router := httpapi.NewRouter(h)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTPAddr,

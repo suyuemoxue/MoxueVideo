@@ -23,10 +23,14 @@ type Config struct {
 }
 
 type OSSConfig struct {
+	Region          string `yaml:"region"`
 	Endpoint        string `yaml:"endpoint"`
 	Bucket          string `yaml:"bucket"`
 	AccessKeyID     string `yaml:"accessKeyId"`
 	AccessKeySecret string `yaml:"accessKeySecret"`
+	RoleARN         string `yaml:"roleArn"`
+	RoleSessionName string `yaml:"roleSessionName"`
+	DurationSeconds int    `yaml:"durationSeconds"`
 }
 
 func Load() Config {
@@ -55,10 +59,24 @@ func Load() Config {
 	cfg.RedisDB = getInt("REDIS_DB", cfg.RedisDB)
 	cfg.RabbitMQURL = getString("RABBITMQ_URL", cfg.RabbitMQURL)
 	cfg.ChatGRPCAddr = getString("CHAT_GRPC_ADDR", cfg.ChatGRPCAddr)
+	cfg.OSS.Region = getString("OSS_REGION", cfg.OSS.Region)
 	cfg.OSS.Endpoint = getString("OSS_ENDPOINT", cfg.OSS.Endpoint)
 	cfg.OSS.Bucket = getString("OSS_BUCKET", cfg.OSS.Bucket)
 	cfg.OSS.AccessKeyID = getString("OSS_ACCESS_KEY_ID", cfg.OSS.AccessKeyID)
 	cfg.OSS.AccessKeySecret = getString("OSS_ACCESS_KEY_SECRET", cfg.OSS.AccessKeySecret)
+	cfg.OSS.RoleARN = getString("OSS_ROLE_ARN", cfg.OSS.RoleARN)
+	cfg.OSS.RoleSessionName = getString("OSS_ROLE_SESSION_NAME", cfg.OSS.RoleSessionName)
+	cfg.OSS.DurationSeconds = getInt("OSS_STS_DURATION_SECONDS", cfg.OSS.DurationSeconds)
+
+	if cfg.OSS.Region == "" {
+		cfg.OSS.Region = "cn-hangzhou"
+	}
+	if cfg.OSS.RoleSessionName == "" {
+		cfg.OSS.RoleSessionName = "moxuevideo-core"
+	}
+	if cfg.OSS.DurationSeconds == 0 {
+		cfg.OSS.DurationSeconds = 900
+	}
 
 	return cfg
 }

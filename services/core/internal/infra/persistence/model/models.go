@@ -6,6 +6,7 @@ type User struct {
 	ID        uint64    `gorm:"primaryKey"`
 	Username  string    `gorm:"size:64;uniqueIndex;not null"`
 	Password  string    `gorm:"size:255;not null"`
+	AvatarURL string    `gorm:"size:512"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
@@ -38,6 +39,14 @@ type Favorite struct {
 	ID        uint64    `gorm:"primaryKey"`
 	UserID    uint64    `gorm:"index;not null"`
 	VideoID   uint64    `gorm:"index;not null"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+}
+
+type Comment struct {
+	ID        uint64    `gorm:"primaryKey"`
+	UserID    uint64    `gorm:"index;not null"`
+	VideoID   uint64    `gorm:"index;not null"`
+	Content   string    `gorm:"size:500;not null"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 
