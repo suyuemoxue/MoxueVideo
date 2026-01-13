@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"moxuevideo/core/internal/config"
+	"moxuevideo/core/internal/domain"
 	"moxuevideo/core/internal/infra/grpcchat"
 	"moxuevideo/core/internal/infra/health"
 	"moxuevideo/core/internal/infra/mq"
@@ -93,6 +95,54 @@ func main() {
 		log.Printf("http listening on %s", cfg.HTTPAddr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("http listen: %v", err)
+		}
+	}()
+
+	go func() {
+		if rmq == nil || rmq.Channel == nil {
+			return
+		}
+		const exchange = "moxuevideo.events"
+		const routingKey = "chat.message.created"
+		const queue = "core.notify"
+
+		if err := rmq.Channel.ExchangeDeclare(exchange, "topic", true, false, false, false, nil); err != nil {
+			log.Printf("mq exchange declare: %v", err)
+			return
+		}
+		q, err := rmq.Channel.QueueDeclare(queue, true, false, false, false, nil)
+		if err != nil {
+			log.Printf("mq queue declare: %v", err)
+			return
+		}
+		if err := rmq.Channel.QueueBind(q.Name, routingKey, exchange, false, nil); err != nil {
+			log.Printf("mq queue bind: %v", err)
+			return
+		}
+		msgs, err := rmq.Channel.Consume(q.Name, "", true, false, false, false, nil)
+		if err != nil {
+			log.Printf("mq consume: %v", err)
+			return
+		}
+		for d := range msgs {
+			if len(d.Body) == 0 {
+				continue
+			}
+			var evt domain.ChatMessageCreated
+			if err := json.Unmarshal(d.Body, &evt); err != nil {
+				continue
+			}
+			if evt.ReceiverID == 0 {
+				continue
+			}
+			h.PushChatMessageCreated(evt.ReceiverID, map[string]any{
+				"kind":       "chat_message",
+				"message_id": evt.MessageID,
+				"thread_id":  evt.ThreadID,
+				"sender_id":  evt.SenderID,
+				"content":    evt.Content,
+				"created_at": evt.CreatedAt,
+			})
 		}
 	}()
 

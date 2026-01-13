@@ -16,6 +16,11 @@ func NewRouter(h *Handler) *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 	{
+		ws := v1.Group("/ws")
+		{
+			ws.GET("/notify", h.NotifyWS)
+		}
+
 		oss := v1.Group("/oss")
 		{
 			oss.GET("/sts", middleware.RequireUser(), h.GetOSSTSToken)

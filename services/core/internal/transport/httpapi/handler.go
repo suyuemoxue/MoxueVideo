@@ -28,7 +28,8 @@ type Handler struct {
 	videoService *video.Service
 	ossService   *oss.Service
 
-	health HealthDeps
+	health    HealthDeps
+	notifyHub *notifyHub
 }
 
 type Deps struct {
@@ -44,6 +45,7 @@ func New(deps Deps) *Handler {
 		videoService: deps.Video,
 		ossService:   deps.OSS,
 		health:       deps.Health,
+		notifyHub:    newNotifyHub(),
 	}
 }
 
