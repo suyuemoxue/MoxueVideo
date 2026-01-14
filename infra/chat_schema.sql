@@ -1,4 +1,4 @@
-﻿CREATE DATABASE IF NOT EXISTS `moxuevideo_chat`
+CREATE DATABASE IF NOT EXISTS `moxuevideo_chat`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_0900_ai_ci;
 
@@ -45,6 +45,5 @@ CREATE TABLE IF NOT EXISTS `dm_message_reads` (
   CONSTRAINT `fk_dm_message_reads_message` FOREIGN KEY (`message_id`) REFERENCES `dm_messages` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='私信消息已读表';
 
-CREATE USER IF NOT EXISTS 'moxue'@'%' IDENTIFIED BY 'suyuemoxue-mojianxue';
 GRANT ALL PRIVILEGES ON `moxuevideo_chat`.* TO 'moxue'@'%';
 FLUSH PRIVILEGES;

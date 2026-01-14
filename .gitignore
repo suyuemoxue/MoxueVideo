@@ -1,3 +1,5 @@
 .idea/
 .vscode/
-services/core/config.local.yaml
+**/config.local.yaml
+.env
+infra/.env

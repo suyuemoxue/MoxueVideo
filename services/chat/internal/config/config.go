@@ -15,8 +15,8 @@ func Load() Config {
 		Env:         getString("APP_ENV", "dev"),
 		GRPCAddr:    getString("GRPC_ADDR", ":50051"),
 		WSAddr:      getString("WS_ADDR", ":50052"),
-		MySQLDSN:    getString("MYSQL_DSN", "moxue:suyuemoxue-mojianxue@tcp(127.0.0.1:3307)/moxuevideo_chat?charset=utf8mb4&parseTime=True&loc=Local"),
-		RabbitMQURL: getString("RABBITMQ_URL", "amqp://app:apppass@127.0.0.1:5672/"),
+		MySQLDSN:    getString("MYSQL_DSN", ""),
+		RabbitMQURL: getString("RABBITMQ_URL", ""),
 	}
 
 	cfg.Env = getString("APP_ENV", cfg.Env)

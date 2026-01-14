@@ -1,12 +1,12 @@
-﻿services:
+services:
   mysql:
     image: mysql:8.0
     container_name: sv-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: suyuemoxue-mojianxue
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       MYSQL_DATABASE: moxuevideo
       MYSQL_USER: moxue
-      MYSQL_PASSWORD: suyuemoxue-mojianxue
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-moxuepass}
       TZ: Asia/Shanghai
     ports:
       - "3307:3306"
@@ -19,7 +19,7 @@
   redis:
     image: redis:7
     container_name: sv-redis
-    command: ["redis-server", "--appendonly", "yes", "--requirepass", "suyuemoxue-mojianxue"]
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-redispass}"]
     ports:
       - "6379:6379"
     volumes:
@@ -30,8 +30,8 @@
     image: rabbitmq:3-management
     container_name: sv-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: app
-      RABBITMQ_DEFAULT_PASS: apppass
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-app}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-rabbitpass}
     ports:
       - "5672:5672"
       - "15672:15672"

@@ -1,4 +1,4 @@
-﻿# 墨雪影视后端（MoxueVideo）
+# 墨雪影视后端（MoxueVideo）
 
 一个使用 Go 构建的多服务后端示例工程，当前包含两个服务：
 
@@ -95,11 +95,11 @@ go run ./cmd/api
 core 支持环境变量覆盖默认配置，也会尝试读取 `services/core/config.local.yaml`（该文件被 `.gitignore` 忽略，适合放本地开发配置）。
 
 - `HTTP_ADDR`：默认 `:8080`
-- `MYSQL_DSN`：默认 `moxue:suyuemoxue-mojianxue@tcp(127.0.0.1:3307)/moxuevideo?charset=utf8mb4&parseTime=True&loc=Local`
+- `MYSQL_DSN`：默认空（建议通过环境变量或 `config.local.yaml` 配置）
 - `REDIS_ADDR`：默认 `127.0.0.1:6379`
-- `REDIS_PASSWORD`：默认 `suyuemoxue-mojianxue`
+- `REDIS_PASSWORD`：默认空（如需密码请自行配置）
 - `REDIS_DB`：默认 `0`
-- `RABBITMQ_URL`：默认 `amqp://app:apppass@127.0.0.1:5672/`
+- `RABBITMQ_URL`：默认空（如需连接请自行配置）
 - `CHAT_GRPC_ADDR`：默认 `127.0.0.1:50051`
 
 数据库迁移：
@@ -117,8 +117,8 @@ OSS STS（可选）：当以下四项都配置时才会初始化，否则接口�
 
 - `GRPC_ADDR`：默认 `:50051`
 - `WS_ADDR`：默认 `:50052`
-- `MYSQL_DSN`：默认 `moxue:suyuemoxue-mojianxue@tcp(127.0.0.1:3307)/moxuevideo_chat?charset=utf8mb4&parseTime=True&loc=Local`
-- `RABBITMQ_URL`：默认 `amqp://app:apppass@127.0.0.1:5672/`
+- `MYSQL_DSN`：默认空（请自行配置）
+- `RABBITMQ_URL`：默认空（如需连接请自行配置）
 
 ## 验证服务是否正常
 
