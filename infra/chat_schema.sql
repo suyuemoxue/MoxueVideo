@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `chat` (
   `is_read` TINYINT NOT NULL DEFAULT 0 COMMENT '是否已读(0未读/1已读)',
   `read_time` VARCHAR(20) NULL COMMENT '阅读时间',
   `create_time` VARCHAR(20) NOT NULL COMMENT '发送时间',
-  `unique` VARCHAR(64) NOT NULL COMMENT '客户端去重唯一标识',
+  `unique` VARCHAR(64) NOT NULL COMMENT '去重唯一标识',
   `is_del` TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除(软删 0正常/1删除)',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_chat_unique` (`unique`),
