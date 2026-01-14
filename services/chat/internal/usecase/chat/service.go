@@ -2,7 +2,10 @@ package chat
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
+	"strings"
 	"time"
 
 	"moxuevideo/chat/internal/domain"
@@ -10,9 +13,7 @@ import (
 )
 
 type Repository interface {
-	EnsureThread(ctx context.Context, userA, userB uint64) (*model.DMThread, error)
-	CreateMessage(ctx context.Context, threadID, senderID, receiverID uint64, content string, createdAt time.Time) (*model.DMMessage, error)
-	UpdateThreadLast(ctx context.Context, threadID, messageID uint64, at time.Time) error
+	CreateChat(ctx context.Context, fromUserID, toUserID uint64, msgType, content, uniqued string, createdAt time.Time) (*model.Chat, error)
 }
 
 type Publisher interface {
@@ -28,41 +29,53 @@ func New(repo Repository, pub Publisher) *Service {
 	return &Service{repo: repo, pub: pub}
 }
 
-func (s *Service) Send(ctx context.Context, senderID, receiverID uint64, threadID uint64, content string) (domain.ChatMessageCreated, error) {
+func (s *Service) Send(ctx context.Context, senderID, receiverID uint64, msgType, content, uniqued string) (domain.ChatMessageCreated, error) {
 	if senderID == 0 || receiverID == 0 || senderID == receiverID {
 		return domain.ChatMessageCreated{}, errors.New("invalid user ids")
 	}
+	content = strings.TrimSpace(content)
 	if content == "" {
 		return domain.ChatMessageCreated{}, errors.New("empty content")
 	}
 
-	var t *model.DMThread
-	var err error
-	if threadID == 0 {
-		t, err = s.repo.EnsureThread(ctx, senderID, receiverID)
-		if err != nil {
-			return domain.ChatMessageCreated{}, err
-		}
-		threadID = t.ID
+	msgType = strings.ToLower(strings.TrimSpace(msgType))
+	if msgType == "" {
+		msgType = "text"
+	}
+	switch msgType {
+	case "text", "picture", "audio":
+	default:
+		return domain.ChatMessageCreated{}, errors.New("invalid msg_type")
+	}
+
+	uniqued = strings.TrimSpace(uniqued)
+	if uniqued == "" {
+		uniqued = newUniqued()
 	}
 
 	now := time.Now()
-	m, err := s.repo.CreateMessage(ctx, threadID, senderID, receiverID, content, now)
+	m, err := s.repo.CreateChat(ctx, senderID, receiverID, msgType, content, uniqued, now)
 	if err != nil {
 		return domain.ChatMessageCreated{}, err
 	}
-	_ = s.repo.UpdateThreadLast(ctx, threadID, m.ID, now)
 
 	evt := domain.ChatMessageCreated{
 		MessageID:  m.ID,
-		ThreadID:   threadID,
 		SenderID:   senderID,
 		ReceiverID: receiverID,
+		MsgType:    msgType,
 		Content:    content,
+		Uniqued:    uniqued,
 		CreatedAt:  now.UnixMilli(),
 	}
 	if s.pub != nil {
 		_ = s.pub.PublishChatMessageCreated(evt)
 	}
 	return evt, nil
+}
+
+func newUniqued() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	return hex.EncodeToString(b)
 }

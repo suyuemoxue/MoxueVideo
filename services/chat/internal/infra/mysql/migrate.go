@@ -7,5 +7,5 @@ import (
 )
 
 func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&model.DMThread{}, &model.DMMessage{}, &model.DMMessageRead{})
+	return db.AutoMigrate(&model.Chat{})
 }

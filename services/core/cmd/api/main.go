@@ -140,8 +140,10 @@ func main() {
 			h.PushChatMessageCreated(evt.ReceiverID, map[string]any{
 				"kind":       "chat_message",
 				"message_id": evt.MessageID,
-				"thread_id":  evt.ThreadID,
 				"sender_id":  evt.SenderID,
+				"msg_type":   evt.MsgType,
+				"uniqued":    evt.Uniqued,
+
 				"content":    evt.Content,
 				"created_at": evt.CreatedAt,
 			})

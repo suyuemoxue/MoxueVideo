@@ -16,9 +16,10 @@ type Server struct {
 }
 
 type SendPayload struct {
-	ThreadID uint64 `json:"thread_id"`
 	ToUserID uint64 `json:"to_user_id"`
+	MsgType  string `json:"msg_type"`
 	Content  string `json:"content"`
+	Uniqued  string `json:"uniqued"`
 }
 
 func NewServer(hub *Hub, svc *chat.Service) *Server {
@@ -73,17 +74,18 @@ func (s *Server) chatWS(ws *websocket.Conn) {
 			if s.service == nil {
 				continue
 			}
-			evt, err := s.service.Send(ws.Request().Context(), userID, p.ToUserID, p.ThreadID, p.Content)
+			evt, err := s.service.Send(ws.Request().Context(), userID, p.ToUserID, p.MsgType, p.Content, p.Uniqued)
 			if err != nil {
 				continue
 			}
-			_ = websocket.Message.Send(ws, mustJSON(NewMessage("ack", map[string]any{"id": m.ID, "message_id": evt.MessageID, "thread_id": evt.ThreadID})))
+			_ = websocket.Message.Send(ws, mustJSON(NewMessage("ack", map[string]any{"id": m.ID, "message_id": evt.MessageID, "uniqued": evt.Uniqued})))
 			msg := NewMessage("message", map[string]any{
 				"message_id": evt.MessageID,
-				"thread_id":  evt.ThreadID,
 				"sender_id":  evt.SenderID,
 				"to_user_id": evt.ReceiverID,
+				"msg_type":   evt.MsgType,
 				"content":    evt.Content,
+				"uniqued":    evt.Uniqued,
 				"created_at": evt.CreatedAt,
 			})
 			s.hub.Send(evt.SenderID, msg)

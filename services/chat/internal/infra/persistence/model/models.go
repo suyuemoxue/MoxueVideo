@@ -2,28 +2,19 @@ package model
 
 import "time"
 
-type DMThread struct {
-	ID            uint64     `gorm:"primaryKey"`
-	UserLowID     uint64     `gorm:"index:uk_dm_threads_pair,unique;not null"`
-	UserHighID    uint64     `gorm:"index:uk_dm_threads_pair,unique;not null"`
-	LastMessageID *uint64    `gorm:"index"`
-	LastMessageAt *time.Time `gorm:"index"`
-	CreatedAt     time.Time  `gorm:"autoCreateTime"`
-	UpdatedAt     time.Time  `gorm:"autoUpdateTime"`
+type Chat struct {
+	ID         uint64     `gorm:"primaryKey;column:id"`
+	FromUserID uint64     `gorm:"column:from_user_id;not null;index:idx_chat_from_to_ct,priority:1"`
+	ToUserID   uint64     `gorm:"column:to_user_id;not null;index:idx_chat_from_to_ct,priority:2;index:idx_chat_to_isread_ct,priority:1;index:idx_chat_to_from_ct,priority:1"`
+	MsgType    string     `gorm:"column:msg_type;type:enum('text','picture','audio');not null;default:'text'"`
+	Content    string     `gorm:"column:content;type:text;not null"`
+	IsRead     uint8      `gorm:"column:is_read;not null;default:0;index:idx_chat_to_isread_ct,priority:2"`
+	Uniqued    string     `gorm:"column:uniqued;size:64;not null;uniqueIndex:uk_chat_uniqued"`
+	CreateTime time.Time  `gorm:"column:create_time;autoCreateTime:milli"`
+	ReadTime   *time.Time `gorm:"column:read_time"`
+	IsDel      uint8      `gorm:"column:is_del;not null;default:0"`
 }
 
-type DMMessage struct {
-	ID         uint64    `gorm:"primaryKey"`
-	ThreadID   uint64    `gorm:"index:idx_dm_messages_thread_id_id,priority:1;not null"`
-	SenderID   uint64    `gorm:"index:idx_dm_messages_sender_id_created_at,priority:1;not null"`
-	ReceiverID uint64    `gorm:"index:idx_dm_messages_receiver_id_id,priority:1;not null"`
-	Content    string    `gorm:"type:text;not null"`
-	CreatedAt  time.Time `gorm:"autoCreateTime"`
-}
-
-type DMMessageRead struct {
-	ID        uint64    `gorm:"primaryKey"`
-	MessageID uint64    `gorm:"index:uk_dm_message_reads_message_user,unique;not null"`
-	UserID    uint64    `gorm:"index:uk_dm_message_reads_message_user,unique;not null"`
-	ReadAt    time.Time `gorm:"autoCreateTime"`
+func (Chat) TableName() string {
+	return "chat"
 }
